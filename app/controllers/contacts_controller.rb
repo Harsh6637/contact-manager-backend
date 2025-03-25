@@ -1,3 +1,5 @@
+require 'amatch'
+
 class ContactsController < ApplicationController
   def index
     render json: Contact.all
@@ -18,11 +20,20 @@ class ContactsController < ApplicationController
     head :no_content
   end
 
-  def search
-    query = params[:query]
-    contacts = Contact.where('name LIKE ? OR email LIKE ?', "%#{query}%", "%#{query}%")
-    render json: contacts
+def search
+  query = params[:query]
+  return render json: [] if query.blank?
+
+  matcher = Amatch::JaroWinkler.new(query.downcase)
+  contacts = Contact.all.select do |contact|
+    name_score = matcher.match(contact.name.downcase)
+    email_score = matcher.match(contact.email.downcase)
+
+    name_score > 0.8 || email_score > 0.8
   end
+
+  render json: contacts
+end
 	
 
   private
