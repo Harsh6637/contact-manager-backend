@@ -52,6 +52,7 @@ group :test do
 end
 
 gem 'fiddle'
+gem 'amatch'
 
 group :test do
   gem 'database_cleaner-active_record'
